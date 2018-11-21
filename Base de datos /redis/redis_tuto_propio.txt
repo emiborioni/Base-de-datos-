@@ -1,0 +1,216 @@
+
+# Mset me permite ingresar muchos valores y claves al mismo tiempo 
+
+
+mset a "hola" b "mundo" c "!"
+OK
+redis:6379> mget a b c
+1) "hola"
+2) "mundo"
+3) "!"
+
+# hacer que expire un valor de clave expire
+
+set myexp 10
+OK
+redis:6379> get myexpire
+"10"
+redis:6379> expire myexp 10
+(integer) 1
+
+
+LISTAS REDIS 
+
+creamos una lista 
+
+rpush myList A
+(integer) 1
+
+Pedimos que nos de los datos de la lista 
+
+lrange  myList 0 0 da el primero # si ponemos 0 -1 nos da todos los resultados que tenga 
+1) "A"
+2) "B"
+3) "C"
+
+eliminar el ultimo dato ingresado 
+
+redis:6379> rpop myList
+"h"
+
+eliminar el primer dato ingresado
+redis:6379> rpop myList
+"A"
+
+eliminar ciertos elementos de la lista
+
+ltrim [numero de inicio] [numero de fin lista ]
+# desde el numero x conserve hasta el numero Y los elementos de la lista 
+
+rpush myList A B C D E F G H I J K
+(integer) 11
+redis:6379> ltrim myList 4 8
+OK
+redis:6379> lrange myList 0 -1
+1) "E"
+2) "F"
+3) "G"
+4) "H"
+5) "I"
+
+
+HASHS
+
+DECLARAR UN HASH 
+redis:6379> hmset usuario:1 nombre "Emiliano" apellido "borioni" edad "19"
+OK
+
+TRAER UN CAMPO DEL HASH 
+redis:6379> hget usuario:1 nombre
+"Emiliano"
+
+NO SE PUEDEN TRAER MAS DE UN DATO CON HGET
+redis:6379> hget usuario:1 nombre apellido
+(error) ERR wrong number of arguments for 'hget' command
+redis:6379> hget usuario:1 apellido
+"borioni"
+HMGET PERMITE TRAER MAS DE UN CAMPO AL MISMO TIEMPO 
+redis:6379> hmget usuario:1 nombre apellido
+1) "Emiliano"
+2) "borioni"
+
+TRAER TODOS LOS CAMPOS DEL HASH 
+redis:6379> hgetall usuario:1
+1) "nombre"
+2) "Emiliano"
+3) "apellido"
+4) "borioni"
+5) "edad"
+6) "19"
+
+VER CUANTAS KEYS EXISTEN Y QUE ID TIENEN 
+keys usuario:*
+1) "usuario:1"
+2) "usuario:2"
+
+incrementar un parametro dentro del hash hincrby 
+
+ hincrby usuario:2 edad 10
+(integer) 29
+redis:6379> hget usuario:2 edad
+"29"
+
+
+SETS 
+
+sadd agregar cosas
+
+sadd numbers 5 6 7 8
+(integer) 4
+
+ver los miembros que tiene una lista 
+
+redis:6379> smembers numbers
+1) "1"
+2) "2"
+3) "3"
+4) "4"
+
+sadd blog:1:tags docker redis visualstudio code nc
+(integer) 5
+
+ smembers blog:1:tags
+1) "code"
+2) "visualstudio"
+3) "docker"
+4) "redis"
+5) "nc"
+
+# Si queremos que muestre en que blog aparece algo 
+sadd tags:visualstudio:blog 1
+(integer) 1
+redis:6379> smembers tags:visualstudio:blog
+1) "1"
+
+
+# TRAER CUANDO UN DATO SE ENCUENTRA EN DOS O MAS LISTAS sinter
+
+sadd tags:visualstudio:blog 2
+(integer) 1
+redis:6379> sadd tags:visualstudio:blog 45
+(integer) 1
+sadd tags:csharp:blog 45
+(integer) 1
+redis:6379> sadd tags:csharp:blog 2
+(integer) 1
+
+redis:6379> sinter tags:visualstudio:blog tags:csharp:blog
+1) "2"
+2) "45"
+
+
+# EQUIVALENTE A JOIN sunion 
+
+sadd tags:sublimetext:blog 2 3 150 80 25 65
+(integer) 6
+redis:6379> sunionstore tagsUnidos tags:visualstudio:blog tags:sublimetext:blog
+(integer) 8
+redis:6379> smembers tagsUnidos
+1) "1"
+2) "2"
+3) "3"
+4) "25"
+5) "45"
+6) "65"
+7) "80"
+8) "150"
+
+
+#Lista pero ordenada no como las anteriores 
+
+ zadd cartas 1 Alfa
+(integer) 1
+redis:6379>  zadd cartas 2 Beta
+(integer) 1
+redis:6379>  zadd cartas 5 Delta
+(integer) 1
+redis:6379>  zadd cartas 4 Gamma
+(integer) 1
+
+# Pedir los datos de una lista ordenada 
+
+redis:6379> zrange cartas 0 -1
+1) "Alfa"
+2) "Beta"
+3) "Gamma"
+4) "Delta"
+
+# Id con el que fueron creados
+
+zrange cartas 0 -1 withscores
+1) "Alfa"
+2) "1"
+3) "Beta"
+4) "2"
+5) "Gamma"
+6) "4"
+7) "Delta"
+8) "5"
+
+# Traer objetos de la tabla ordenada pero por el id en el momento de su creacion (score) 
+
+zrangebyscore cartas -inf 4
+1) "Alfa"
+2) "Beta"
+3) "Gamma"
+redis:6379> zrangebyscore cartas 0 inf
+1) "Alfa"
+2) "Beta"
+3) "Gamma"
+4) "Delta"
+
+#Buscar un elemento de una lista ordenada 
+
+zrank cartas Gamma
+(integer) 2
+

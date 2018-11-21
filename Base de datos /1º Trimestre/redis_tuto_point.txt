@@ -1,0 +1,705 @@
+docker run --name redis -v ~/redis_data:/data -p 6379:6379 -d redis  
+docker run -it --link some-redis:redis --rm redis redis-cli -h redis -p 6379
+docker run -it --link redis:redis --rm redis redis-cli -h redis -p 6379
+
+Redis string 
+
+SET VALUES 
+In SET command, there are many options available, that modify the behavior of command. Following is the basic syntax of SET command with available options.
+
+redis 127.0.0.1:6379> SET KEY VALUE [EX seconds] [PX milliseconds] [NX|XX]
+
+    EX seconds − Sets the specified expire time, in seconds.
+
+    PX milliseconds − Sets the specified expire time, in milliseconds.
+
+    NX − Only sets the key if it does not already exist.
+
+    XX − Only sets the key if it already exists.
+	
+Example 
+	SET tutorialspoint redis EX 60 NX  
+
+GET VALUES 
+
+Redis GET command is used to get the value stored in the specified key. If the key does not exist, then nil is returned. If the returned value is not a string, then error is returned.
+
+GET KEY_NAME
+
+Example
+SET tutorialspoint redis 
+OK 
+GET tutorialspoint 
+"redis" 
+
+GETRANGE
+
+is used to get the substring of the string value stored at the key, determined by the offsets start and end (both are inclusive). Negative offsets can be used in order to provide an offset starting from the end of the string.
+
+The function handles out of range requests by limiting the resulting range to the actual length of the string.
+
+Example 
+
+SET mykey "This is my test key" 
+OK 
+redis 127.0.0.1:6379> GETRANGE mykey 0 3 
+"This" 
+redis 127.0.0.1:6379> GETRANGE mykey 0 -1 
+"This is my test key"
+
+GETSET
+
+Redis GETSET command sets the specified string value in Redis key and returns its old value.
+GETSET KEY_NAME VALUE
+
+GETSET mynewkey "This is my test key" 
+(nil) 
+GETSET mynewkey "This is my new value to test getset" 
+"This is my test key"
+
+MGET
+Redis MGET command is used to get the values of all specified keys. For every key that does not hold a string value or does not exist, the special value nil is returned.
+
+MGET KEY1 KEY2 .. KEYN
+
+Example
+
+SET key1 "hello" 
+OK 
+SET key2 "world" 
+OK 
+MGET key1 key2 someOtherKey 
+1) "Hello" 
+2) "World" 
+3) (nil)
+
+SETBIT
+Redis SETBIT command is used to set the bit value at the offset in the string value stored at the key.
+
+SETBIT KEY_NAME OFFSET
+
+Example
+
+SETBIT mykey 7 1 
+(integer) 0 
+GETBIT mykey 0 
+(integer) 0 
+GETBIT mykey 7 
+(integer) 1 
+GETBIT mykey 100 
+(integer) 0
+
+
+INCR 
+Redis INCR command is used to increment the integer value of a key by one. If the key does not exist, it is set to 0 before performing the operation. An error is returned if the key contains a value of the wrong type or contains a string that cannot be represented as an integer. This operation is limited to 64 bit signed integers.
+INCR KEY_NAME
+
+Example
+
+SET visitors 1000 
+OK 
+INCR visitors 
+(integer) 1001 
+GET visitors 
+(integer) 1001
+
+INCRBY
+Redis INCRBY command is used to increment the number stored at the key by the specified value. If the key does not exist, it is set to 0 before performing the operation. An error is returned, if the key contains a value of the wrong type or contains a string that cannot be represented as an integer.
+
+INCRBY KEY_NAME INCR_AMOUNT
+
+Example
+
+SET visitors 1000 
+OK 
+INCRBY visitors 5 
+(integer) 1005 
+GET visitors 
+(integer) 1005
+
+
+
+HASHES 
+
+Redis Hashes are maps between the string fields and the string values. Hence, they are the perfect data type to represent objects.
+
+In Redis, every hash can store up to more than 4 billion field-value pairs.
+Example
+
+redis 127.0.0.1:6379> HMSET tutorialspoint name "redis tutorial" 
+description "redis basic commands for caching" likes 20 visitors 23000 
+OK 
+redis 127.0.0.1:6379> HGETALL tutorialspoint  
+1) "name" 
+2) "redis tutorial" 
+3) "description" 
+4) "redis basic commands for caching" 
+5) "likes" 
+6) "20" 
+7) "visitors" 
+8) "23000"
+
+HDEL
+Redis HDEL command is used to remove specified fields from the hash stored at the key. Specified fields that do not exist within this hash are ignored. If the key does not exist, it is treated as an empty hash and this command returns 0.
+
+HDEL KEY_NAME FIELD1.. FIELDN
+
+Example
+
+redis 127.0.0.1:6379> HSET myhash field1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> HDEL myhash field1 
+(integer) 1 
+redis 127.0.0.1:6379> HDEL myhash field2 
+(integer) 1
+
+HEXISTS 
+Redis HEXISTS command is used to check whether a hash field exists or not.
+HEXISTS KEY_NAME FIELD_NAME
+
+    1, if the hash contains a field.
+    0 if the hash does not contain a field, or the key does not exist.
+
+Example
+
+redis 127.0.0.1:6379> HSET myhash field1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> HEXISTS myhash field1 
+(integer) 1 
+redis 127.0.0.1:6379> HEXISTS myhash field2 
+(integer) 0
+
+HGET
+Redis HGET command is used to get the value associated with the field in the hash stored at the key.
+Return Value
+
+String reply, the value associated with the field. Nil, when the field is not present in the hash or the key does not exist.
+
+HGET KEY_NAME FIELD_NAME 
+
+Example
+
+redis 127.0.0.1:6379> HSET myhash field1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> HGET myhash field1 
+"foo" 
+redis 127.0.0.1:6379> HEXISTS myhash field2 
+(nil)
+
+HGETALL
+Redis HGETALL command is used to get all the fields and values of the hash stored at the key. In the returned value, every field name is followed by its value, so the length of the reply is twice the size of the hash.
+Return Value
+
+Array reply, list of fields and their values stored in the hash, or an empty list when the key does not exist.
+
+HGETALL KEY_NAME 
+
+Example
+
+redis 127.0.0.1:6379> HSET myhash field1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> HSET myhash field2 "bar" 
+(integer) 1 
+redis 127.0.0.1:6379> HGETALL myhash 
+1) "field1" 
+2) "Hello" 
+3) "field2" 
+4) "World"
+
+HMGET
+Redis HMGET command is used to get the values associated with the specified fields in the hash stored at the key. If the field does not exist in Redis hash, then a nil value is returned.
+Return Value
+
+Array reply, list of values associated with the given fields, in the same order as they are requested.
+
+HMGET KEY_NAME FIELD1...FIELDN 
+
+Example
+
+redis 127.0.0.1:6379> HSET myhash field1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> HSET myhash field2 "bar" 
+(integer) 1 
+redis 127.0.0.1:6379> HMGET myhash field1 field2 nofield 
+1) "foo" 
+2) "bar" 
+3) (nil)
+
+HMSET
+Redis HMSET command is used to set the specified fields to their respective values in the hash stored at the key. This command overwrites any existing fields in the hash. If the key does not exist, a new key holding a hash is created.
+
+HMSET KEY_NAME FIELD1 VALUE1 ...FIELDN VALUEN
+
+Example
+
+redis 127.0.0.1:6379> HMSET myhash field1 "foo" field2 "bar" 
+OK 
+redis 127.0.0.1:6379> HGET myhash field1 
+"foo" 
+redis 127.0.0.1:6379> HGET myhash field2 
+"bar"
+
+
+LIST 
+
+Redis Lists are simply lists of strings, sorted by insertion order. You can add elements in Redis lists in the head or the tail of the list.
+
+Maximum length of a list is 232 - 1 elements (4294967295, more than 4 billion of elements per list).
+Example
+
+redis 127.0.0.1:6379> LPUSH tutorials redis 
+(integer) 1 
+redis 127.0.0.1:6379> LPUSH tutorials mongodb 
+(integer) 2 
+redis 127.0.0.1:6379> LPUSH tutorials mysql 
+(integer) 3 
+redis 127.0.0.1:6379> LRANGE tutorials 0 10  
+1) "mysql" 
+2) "mongodb" 
+3) "redis"
+
+BLPOP
+Redis BLPOP command is used to remove and get the first element in a list, or block until one is available. BLPOP command just returns the first element, if available, or blocks the client for specific time to execute any command.
+Return Value
+
+String reply, the value of element stored at the key or nil.
+
+BLPOP LIST1 LIST2 .. LISTN TIMEOUT
+
+Example
+
+redis 127.0.0.1:6379> BLPOP list1 100 
+
+The above example will block the client for 100 seconds to execute any command. If any data comes in the specified key list1, then it returns; otherwise after 100 seconds nil value is returned.
+
+BROP 
+Redis BRPOP command is used to remove and get the last element in a list, or block until one is available. BRPOP command just returns the last element, if available, or blocks the client for specific time to execute any command.
+Return Value
+
+String reply, the value of element stored at the key or nil.
+
+BRPOP LIST1 LIST2 .. LISTN TIMEOUT
+
+Example
+
+redis 127.0.0.1:6379> BRPOP list1 100
+
+The above example will block the client for 100 seconds to execute any command. If any data comes in the specified key list1, then it returns; otherwise after 100 seconds nil value is returned.
+
+BRPOPLPUSH
+Redis BRPOPLPUSH command is used to pop a value from a list, push it to another list and return it, or block until one is available. BRPOPLPUSH command just returns the last element and inserts it into another list, if available, or blocks the client for specific time to execute any command.
+Return Value
+
+String reply, the value of element stored at the key or nil.
+
+BRPOPLPUSH LIST1 ANOTHER_LIST TIMEOUT 
+
+Example
+
+redis 127.0.0.1:6379> BRPOPLPUSH list1 list2 100
+
+LINDEX
+Redis LINDEX command is used to get the element at the index in the list stored at the key. The index is zero-based, so 0 means the first element, 1 the second element, and so on. Negative indices can be used to designate elements starting at the tail of the list. Here, -1 means the last element, -2 means the penultimate, and so forth.
+
+String reply, the requested element, or nil when the index is out of range.
+
+LINDEX KEY_NAME INDEX_POSITION
+
+Example
+
+redis 127.0.0.1:6379> LPUSH list1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> LPUSH list1 "bar" 
+(integer) 2 
+redis 127.0.0.1:6379> LINDEX list1 0 
+"foo" 
+redis 127.0.0.1:6379> LINDEX list1 -1 
+"bar" 
+redis 127.0.0.1:6379> LINDEX list1 5 
+nil 
+
+LINSERT
+Redis LINSERT command inserts the value in the list stored at the key either before or after the reference value pivot. When the key does not exist, it is considered an empty list and no operation is performed. An error is returned when the key exists but does not hold a list value.
+
+Integer reply, the length of the list after the insert operation, or -1 when the value pivot was not found.
+
+LINSERT KEY_NAME BEFORE EXISTING_VALUE NEW_VALUE
+
+Example
+
+redis 127.0.0.1:6379> RPUSH list1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> RPUSH list1 "bar" 
+(integer) 2 
+redis 127.0.0.1:6379> LINSERT list1 BEFORE "bar" "Yes" 
+(integer) 3 
+redis 127.0.0.1:6379> LRANGE mylist 0 -1 
+1) "foo" 
+2) "Yes" 
+3) "bar"
+
+
+
+SETS
+
+Redis Sets are an unordered collection of unique strings. Unique means sets does not allow repition of data in a key.
+
+In Redis set add, remove, and test for the existence of members in O(1) (constant time regardless of the number of elements contained inside the Set). The maximum length of a list is 232 - 1 elements (4294967295, more than 4 billion of elements per set).
+Example
+
+redis 127.0.0.1:6379> SADD tutorials redis 
+(integer) 1 
+redis 127.0.0.1:6379> SADD tutorials mongodb 
+(integer) 1 
+redis 127.0.0.1:6379> SADD tutorials mysql 
+(integer) 1 
+redis 127.0.0.1:6379> SADD tutorials mysql 
+(integer) 0 
+redis 127.0.0.1:6379> SMEMBERS tutorials  
+1) "mysql" 
+2) "mongodb" 
+3) "redis"
+
+SADD
+Redis SADD command is used to add members to a set stored at the key. If the member already exists, then it is ignored. If the key does not exist, then a new set is created and the members are added into it. If the value stored at the key is not set, then an error is returned.
+
+Integer reply, the number of elements that were added to the set, not including all the elements already present in the set.
+SADD KEY_NAME VALUE1..VALUEN
+
+Example
+
+redis 127.0.0.1:6379> SADD myset "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset "hello" 
+(integer) 0 
+redis 127.0.0.1:6379> SMEMBERS myset 
+1) "hello" 
+2) "foo"
+
+SCARD (SET CARD COMMAND) 
+Redis SCARD command is used to return the number of elements stored in a set.
+
+Integer reply, the cardinality (number of elements) of the set, or 0 if the key does not exist.
+
+SCARD KEY_NAME
+
+Example
+
+redis 127.0.0.1:6379> SADD myset "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset "hello" 
+(integer) 0 
+redis 127.0.0.1:6379> SCARD myset 
+(integer) 2
+
+SINTER (SET SINTER COMMAND) 
+Redis SINTER command gets the elements of a set after intersection of all specified sets. Keys that do not exist are considered to be empty sets. With one of the keys being an empty set, the resulting set is also empty (since set intersection with an empty set always results in an empty set).
+Return Value
+
+Array reply, list with members of the resulting set.
+
+ SINTER KEY KEY1..KEYN
+
+Example
+
+redis 127.0.0.1:6379> SADD myset "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset "foo"
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset "bar" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset2 "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset2 "world" 
+(integer) 1 
+redis 127.0.0.1:6379> SINTER myset myset2 
+1) "hello"
+
+SINTERSTORE
+Redis SINTERSTORE command stores the elements in a set after intersection of all specified sets. Keys that do not exist are considered to be empty sets. With one of the keys being an empty set, the resulting set is also empty (since set intersection with an empty set always results in an empty set).
+
+Integer reply, the number of elements in the resulting set.
+
+SINTERSTORE DESTINATION_KEY KEY KEY1..KEYN
+
+Example
+
+redis 127.0.0.1:6379> SADD myset1 "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset1 "foo" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset1 "bar" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset2 "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SADD myset2 "world" 
+(integer) 1 
+redis 127.0.0.1:6379> SINTERSTORE myset myset1 myset2 
+(integer) 1 
+redis 127.0.0.1:6379> SMEMBERS myset 
+1) "hello" 
+
+SISMEMBER
+Redis SISMEMBER returns an element that already exists in the set stored at the key or not.
+Return Value
+
+Integer reply
+
+    1, if the element is a member of the set.
+    0, if the element is not a member of the set, or if the key does not exist.
+
+SISMEMBER KEY VALUE
+
+Example
+
+redis 127.0.0.1:6379> SADD myset1 "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SISMEMBER myset1 "hello" 
+(integer) 1 
+redis 127.0.0.1:6379> SISMEMBER myset1 "world" 
+(integer) 0 
+
+
+ PUBLISH SUSCRIBE
+
+Redis Pub/Sub implements the messaging system where the senders (in redis terminology called publishers) sends the messages while the receivers (subscribers) receive them. The link by which the messages are transferred is called channel.
+
+In Redis, a client can subscribe any number of channels.
+Example
+
+Following example explains how publish subscriber concept works. In the following example, one client subscribes a channel named ‘redisChat’.
+
+redis 127.0.0.1:6379> SUBSCRIBE redisChat  
+Reading messages... (press Ctrl-C to quit) 
+1) "subscribe" 
+2) "redisChat" 
+3) (integer) 1 
+
+Now, two clients are publishing the messages on the same channel named ‘redisChat’ and the above subscribed client is receiving messages.
+
+redis 127.0.0.1:6379> PUBLISH redisChat "Redis is a great caching technique"  
+(integer) 1  
+redis 127.0.0.1:6379> PUBLISH redisChat "Learn redis by tutorials point"  
+(integer) 1   
+1) "message" 
+2) "redisChat" 
+3) "Redis is a great caching technique" 
+1) "message" 
+2) "redisChat" 
+3) "Learn redis by tutorials point" 
+
+PSUBSCRIBE
+Redis PSUBSCRIBE command is used to subscribe to channels matching the given patterns.
+
+redis 127.0.0.1:6379> PSUBSCRIBE CHANNEL_NAME_OR_PATTERN [PATTERN...]
+
+Following listing shows some supported patterns in Redis.
+
+    h?llo subscribes to hello, hallo and hxllo
+    h*llo subscribes to hllo and heeeello
+    h[ae]llo subscribes to hello and hallo, but not hillo
+
+Example
+
+redis 127.0.0.1:6379> PSUBSCRIBE mychannel 
+Reading messages... (press Ctrl-C to quit) 
+1) "psubscribe" 
+2) "mychannel" 
+3) (integer) 1 
+
+
+PUBLISH
+Redis PUBLISH command posts a message to a channel.
+
+redis 127.0.0.1:6379> PUBLISH channel message
+
+Integer reply − the number of clients that received the message.
+
+Example
+
+redis 127.0.0.1:6379> PUBLISH mychannel "hello, i m here" 
+(integer) 1
+
+
+PUNSUBSCRIBE
+Redis PUNSUBSCRIBE command unsubscribes the client from the given patterns, or from all of them if none is given. When no patterns are specified, the client is unsubscribed from all the previously subscribed patterns. In this case, a message for every unsubscribed pattern will be sent to the client.
+
+redis 127.0.0.1:6379> PUNSUBSCRIBE [pattern [pattern ...]] 
+
+Return Value
+
+Array reply.
+
+Example
+
+redis 127.0.0.1:6379> PUNSUBSCRIBE mychannel  
+1) "punsubscribe" 
+2) "a" 
+3) (integer) 1 
+
+
+
+TRANSACTIONS
+Redis transactions allow the execution of a group of commands in a single step. Following are the two properties of Transactions.
+
+    All commands in a transaction are sequentially executed as a single isolated operation. It is not possible that a request issued by another client is served in the middle of the execution of a Redis transaction.
+
+    Redis transaction is also atomic. Atomic means either all of the commands or none are processed.
+
+Sample
+
+Redis transaction is initiated by command MULTI and then you need to pass a list of commands that should be executed in the transaction, after which the entire transaction is executed by EXEC command.
+
+redis 127.0.0.1:6379> MULTI 
+OK 
+List of commands here 
+redis 127.0.0.1:6379> EXEC
+
+Example
+
+Following example explains how Redis transaction can be initiated and executed.
+
+redis 127.0.0.1:6379> MULTI 
+OK 
+redis 127.0.0.1:6379> SET tutorial redis 
+QUEUED 
+redis 127.0.0.1:6379> GET tutorial 
+QUEUED 
+redis 127.0.0.1:6379> INCR visitors 
+QUEUED 
+redis 127.0.0.1:6379> EXEC  
+1) OK 
+2) "redis" 
+3) (integer) 1 
+
+
+DISCARD
+Redis DISCARD command flushes all previously queued commands in a transaction and restores the connection state to normal.
+Return Value
+
+String reply OK
+Syntax
+
+Basic syntax of redis DISCARD command is shown below:
+
+redis 127.0.0.1:6379> DISCARD 
+
+
+EXEC
+Redis EXEC command executes all previously queued commands in a transaction and restores the connection state to normal.
+Return Value
+
+Array reply, each element being the reply to each of the commands in the atomic transaction.
+Syntax
+
+Following is the basic syntax of Redis EXEC command.
+
+redis 127.0.0.1:6379> EXEC
+
+
+MULTI
+Redis MULTI command marks the start of a transaction block. Subsequent commands will be queued for atomic execution using EXEC.
+Return Value
+
+Simple string reply − always OK.
+Syntax
+
+Following is the basic syntax of Redis MULTI command.
+
+redis 127.0.0.1:6379> MULTI
+
+
+BENCHMARK
+Redis benchmark is the utility to check the performance of Redis by running n commands simultaneously.
+Syntax
+
+Following is the basic syntax of Redis benchmark.
+
+redis-benchmark [option] [option value] 
+
+Example
+
+Following example checks Redis by calling 100000 commands.
+
+redis-benchmark -n 100000  
+
+PING_INLINE: 141043.72 requests per second 
+PING_BULK: 142857.14 requests per second 
+SET: 141442.72 requests per second 
+GET: 145348.83 requests per second 
+INCR: 137362.64 requests per second 
+LPUSH: 145348.83 requests per second 
+LPOP: 146198.83 requests per second 
+SADD: 146198.83 requests per second 
+SPOP: 149253.73 requests per second 
+LPUSH (needed to benchmark LRANGE): 148588.42 requests per second 
+LRANGE_100 (first 100 elements): 58411.21 requests per second 
+LRANGE_300 (first 300 elements): 21195.42 requests per second 
+LRANGE_500 (first 450 elements): 14539.11 requests per second 
+LRANGE_600 (first 600 elements): 10504.20 requests per second 
+MSET (10 keys): 93283.58 requests per second 
+
+Following is a list of available options in Redis benchmark.
+Sr.No 	Option 	Description 	Default Value
+1 	-h 	Specifies server host name 	127.0.0.1
+2 	-p 	Specifies server port 	6379
+3 	-s 	Specifies server socket 	
+4 	-c 	Specifies the number of parallel connections 	50
+5 	-n 	Specifies the total number of requests 	10000
+6 	-d 	Specifies data size of SET/GET value in bytes 	2
+7 	-k 	1=keep alive, 0=reconnect 	1
+8 	-r 	Use random keys for SET/GET/INCR, random values for SADD 	
+9 	-p 	Pipeline <numreq> requests 	1
+10 	-h 	Specifies server host name 	
+11 	-q 	Forces Quiet to Redis. Just shows query/sec values 	
+12 	--csv 	Output in CSV format 	
+13 	-l 	Generates loop, Run the tests forever 	
+14 	-t 	Only runs the comma-separated list of tests 	
+15 	-I 	Idle mode. Just opens N idle connections and wait 	
+Example
+
+Following example shows the multiple usage options in Redis benchmark utility.
+
+redis-benchmark -h 127.0.0.1 -p 6379 -t set,lpush -n 100000 -q  
+
+SET: 146198.83 requests per second 
+LPUSH: 145560.41 requests per second 
+
+
+
+BACKUP
+Redis SAVE command is used to create a backup of the current Redis database.
+Syntax
+
+Following is the basic syntax of redis SAVE command.
+
+127.0.0.1:6379> SAVE 
+
+Example
+
+Following example creates a backup of the current database.
+
+127.0.0.1:6379> SAVE  
+OK 
+
+This command will create a dump.rdb file in your Redis directory.
+Restore Redis Data
+
+To restore Redis data, move Redis backup file (dump.rdb) into your Redis directory and start the server. To get your Redis directory, use CONFIG command of Redis as shown below.
+
+127.0.0.1:6379> CONFIG get dir  
+1) "dir" 
+2) "/user/tutorialspoint/redis-2.8.13/src" 
+
+In the output of the above command /user/tutorialspoint/redis-2.8.13/src is the directory, where Redis server is installed.
+Bgsave
+
+To create Redis backup, an alternate command BGSAVE is also available. This command will start the backup process and run this in the background.
+Example
+
+127.0.0.1:6379> BGSAVE  
+Background saving started
